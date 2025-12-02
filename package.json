@@ -1,0 +1,37 @@
+{
+  "name": "newscore",
+  "version": "0.1.0",
+  "description": "Modern News CMS backend built with NestJS and TypeScript.",
+  "license": "MIT",
+  "scripts": {
+    "start": "node dist/main.js",
+    "start:dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/main.ts",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.7",
+    "@nestjs/config": "^3.2.2",
+    "@nestjs/core": "^10.4.7",
+    "@nestjs/platform-express": "^10.4.7",
+    "@prisma/client": "^5.17.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "compression": "^1.7.4",
+    "helmet": "^7.1.0",
+    "joi": "^17.12.3",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.7.5",
+    "@types/helmet": "^0.0.52",
+    "@types/node": "^20.14.10",
+    "prisma": "^5.17.0",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.3.2",
+    "typescript": "^5.5.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

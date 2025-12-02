@@ -1,0 +1,25 @@
+import * as Joi from 'joi';
+
+export const validationSchema = Joi.object({
+  NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  PORT: Joi.number().default(3000),
+  API_PREFIX: Joi.string().default('api'),
+  API_VERSION: Joi.string().default('v1'),
+  DATABASE_URL: Joi.string().uri().required(),
+  REDIS_HOST: Joi.string().default('localhost'),
+  REDIS_PORT: Joi.number().default(6379),
+  REDIS_PASSWORD: Joi.string().allow('').optional(),
+  JWT_SECRET: Joi.string().min(32).required(),
+  JWT_ACCESS_EXPIRATION: Joi.string().default('15m'),
+  JWT_REFRESH_EXPIRATION: Joi.string().default('7d'),
+  S3_ENDPOINT: Joi.string().uri().optional(),
+  S3_ACCESS_KEY: Joi.string().optional(),
+  S3_SECRET_KEY: Joi.string().optional(),
+  S3_BUCKET: Joi.string().optional(),
+  S3_REGION: Joi.string().default('us-east-1'),
+  MEILISEARCH_HOST: Joi.string().uri().optional(),
+  MEILISEARCH_API_KEY: Joi.string().allow('').optional(),
+  THROTTLE_TTL: Joi.number().default(60),
+  THROTTLE_LIMIT: Joi.number().default(100),
+  LOG_LEVEL: Joi.string().default('debug'),
+});
