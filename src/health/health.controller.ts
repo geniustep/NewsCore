@@ -1,8 +1,10 @@
-import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { Public } from '../common/decorators/public.decorator';
 
-@Controller({ path: 'health', version: VERSION_NEUTRAL })
+@Controller('health')
 export class HealthController {
   @Get()
+  @Public()
   getStatus(): { status: string } {
     return { status: 'ok' };
   }

@@ -12,7 +12,9 @@
     "baseUrl": "./",
     "incremental": true,
     "strict": true,
+    "strictPropertyInitialization": false,
     "moduleResolution": "node",
+    "skipLibCheck": true,
     "paths": {
       "*": ["node_modules/*"]
     }

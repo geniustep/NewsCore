@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  newscore:
+  newscore-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: newscore
+    container_name: newscore-api
     restart: unless-stopped
     env_file:
       - .env
@@ -20,6 +20,26 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - newscore_network
+      - routy-traefik_web
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  newscore-admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: newscore-admin
+    restart: unless-stopped
+    depends_on:
+      - newscore-api
     networks:
       - newscore_network
       - routy-traefik_web
@@ -27,21 +47,15 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=routy-traefik_web"
       # HTTP to HTTPS redirect
-      - "traefik.http.routers.newscore-web.rule=Host(`admin.sahara2797.com`)"
-      - "traefik.http.routers.newscore-web.entrypoints=web"
-      - "traefik.http.routers.newscore-web.middlewares=https-redirect"
+      - "traefik.http.routers.newscore-admin-web.rule=Host(`admin.sahara2797.com`)"
+      - "traefik.http.routers.newscore-admin-web.entrypoints=web"
+      - "traefik.http.routers.newscore-admin-web.middlewares=https-redirect"
       # HTTPS
-      - "traefik.http.routers.newscore.rule=Host(`admin.sahara2797.com`)"
-      - "traefik.http.routers.newscore.entrypoints=websecure"
-      - "traefik.http.routers.newscore.tls.certresolver=lehttp"
-      - "traefik.http.routers.newscore.service=newscore"
-      - "traefik.http.services.newscore.loadbalancer.server.port=3000"
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - "traefik.http.routers.newscore-admin.rule=Host(`admin.sahara2797.com`)"
+      - "traefik.http.routers.newscore-admin.entrypoints=websecure"
+      - "traefik.http.routers.newscore-admin.tls.certresolver=lehttp"
+      - "traefik.http.routers.newscore-admin.service=newscore-admin"
+      - "traefik.http.services.newscore-admin.loadbalancer.server.port=80"
 
   postgres:
     image: postgres:16-alpine
@@ -51,6 +65,8 @@ services:
       POSTGRES_USER: ${DB_USER:-newscore}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-newscore123}
       POSTGRES_DB: ${DB_NAME:-newscoredb}
+    ports:
+      - "127.0.0.1:5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -81,10 +97,11 @@ volumes:
     driver: local
   redis_data:
     driver: local
+  uploads_data:
+    driver: local
 
 networks:
   newscore_network:
     driver: bridge
   routy-traefik_web:
     external: true
-

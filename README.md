@@ -1,201 +1,519 @@
-# NewsCore - Professional News CMS Backend
+# 📰 NewsCore - نظام إدارة المحتوى الإخباري
 
-A scalable, modern News Content Management System backend built with NestJS, Prisma, and TypeScript.
+<div align="center">
 
-## 🚀 Features
+![NewsCore Logo](https://img.shields.io/badge/NewsCore-CMS-blue?style=for-the-badge&logo=newspaper&logoColor=white)
 
-- **Multi-language Support**: Built-in support for Arabic, English, and French
-- **Advanced RBAC**: Role-Based Access Control with fine-grained permissions
-- **Content Ingestion**: RSS, API, and web scraping capabilities
-- **AI Integration**: Content summarization, translation, and classification
-- **Analytics**: Real-time analytics and trending content detection
-- **Media Management**: S3-compatible storage with image processing
-- **Search**: Full-text search with Meilisearch
-- **Queue System**: BullMQ for background job processing
-- **Caching**: Redis for high-performance caching
-- **API Documentation**: Auto-generated Swagger/OpenAPI documentation
+[![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
 
-## 🏗️ Tech Stack
+**نظام متكامل لإدارة المحتوى الإخباري مع لوحة تحكم حديثة ودعم كامل للغة العربية**
 
-- **Runtime**: Node.js 20+ LTS
-- **Language**: TypeScript 5.x (strict mode)
-- **Framework**: NestJS 10.x
-- **Database**: PostgreSQL 16
-- **ORM**: Prisma 5.x
-- **Cache**: Redis 7.x (ioredis)
-- **Queue**: BullMQ
-- **Search**: Meilisearch
-- **Storage**: S3-compatible (MinIO/DigitalOcean Spaces)
-- **Auth**: JWT + Refresh Tokens + Passport.js
-- **Testing**: Jest + Supertest
-- **Containerization**: Docker + Docker Compose
+[العرض التجريبي](https://admin.sahara2797.com) • [التوثيق](https://admin.sahara2797.com/api/docs) • [الإبلاغ عن مشكلة](../../issues)
 
-## 📋 Prerequisites
+</div>
 
-- Node.js >= 20
-- Docker & Docker Compose
-- PostgreSQL 16 (or use Docker)
-- Redis 7 (or use Docker)
+---
 
-## 🛠️ Installation
+## 📋 المحتويات
 
-1. Clone the repository:
+- [نظرة عامة](#-نظرة-عامة)
+- [المميزات](#-المميزات)
+- [المتطلبات](#-المتطلبات)
+- [التثبيت](#-التثبيت)
+- [الإعداد](#-الإعداد)
+- [التشغيل](#-التشغيل)
+- [بنية المشروع](#-بنية-المشروع)
+- [API Documentation](#-api-documentation)
+- [قاعدة البيانات](#-قاعدة-البيانات)
+- [النشر](#-النشر)
+- [المساهمة](#-المساهمة)
+
+---
+
+## 🌟 نظرة عامة
+
+**NewsCore** هو نظام إدارة محتوى إخباري متكامل مبني بأحدث التقنيات. يوفر:
+
+- 🖥️ **Backend API** مبني بـ NestJS مع TypeScript
+- 🎨 **لوحة تحكم** حديثة مبنية بـ React + Vite + TailwindCSS
+- 🗄️ **قاعدة بيانات** PostgreSQL مع Prisma ORM
+- 🔐 **نظام مصادقة** متكامل مع JWT
+- 🌐 **دعم كامل للغة العربية** مع واجهة RTL
+
+---
+
+## ✨ المميزات
+
+### 🔐 المصادقة والأمان
+- تسجيل دخول آمن مع JWT (Access + Refresh Tokens)
+- نظام صلاحيات متقدم (RBAC)
+- تشفير كلمات المرور بـ bcrypt
+- حماية من هجمات CSRF و XSS
+- Rate Limiting للحماية من هجمات DDoS
+
+### 📝 إدارة المقالات
+- إنشاء وتحرير المقالات مع محرر WYSIWYG
+- دعم الحالات المتعددة (مسودة، منشور، مؤرشف)
+- جدولة النشر
+- تصنيفات ووسوم متعددة
+- SEO محسّن (عنوان، وصف، صورة مميزة)
+- توليد تلقائي للـ Slug
+
+### 📁 إدارة الوسائط
+- رفع الصور والملفات
+- تنظيم الملفات في مجلدات
+- معاينة الصور
+- دعم أنواع متعددة من الملفات
+
+### 👥 إدارة المستخدمين
+- إنشاء وإدارة المستخدمين
+- أدوار متعددة (مدير، محرر، كاتب)
+- ملفات شخصية للمستخدمين
+
+### 🏷️ التصنيفات والوسوم
+- تصنيفات هرمية
+- وسوم مرنة
+- ربط المقالات بتصنيفات ووسوم متعددة
+
+### 📊 لوحة التحكم
+- إحصائيات شاملة
+- واجهة حديثة وسهلة الاستخدام
+- دعم كامل للغة العربية (RTL)
+- تصميم متجاوب لجميع الأجهزة
+
+---
+
+## 📦 المتطلبات
+
+### للتطوير المحلي
+- **Node.js** >= 20.x
+- **npm** >= 10.x
+- **PostgreSQL** >= 16
+- **Redis** >= 7 (اختياري للـ caching)
+
+### للنشر بـ Docker
+- **Docker** >= 24.x
+- **Docker Compose** >= 2.x
+
+---
+
+## 🚀 التثبيت
+
+### 1. استنساخ المشروع
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/your-org/NewsCore.git
 cd NewsCore
 ```
 
-2. Install dependencies:
+### 2. تثبيت التبعيات
+
 ```bash
+# Backend
 npm install
+
+# Admin Dashboard
+cd admin && npm install && cd ..
 ```
 
-3. Set up environment variables:
+### 3. إعداد متغيرات البيئة
+
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
 ```
 
-4. Start infrastructure services:
-```bash
-npm run docker:dev
+قم بتعديل `.env` حسب إعداداتك:
+
+```env
+# Database
+DATABASE_URL=postgresql://newscore:newscore123@localhost:5432/newscoredb?schema=public
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+
+# Redis (اختياري)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# CORS
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 
-5. Run Prisma migrations:
+### 4. إعداد قاعدة البيانات
+
 ```bash
-npm run prisma:generate
-npm run prisma:migrate
+# إنشاء الترحيلات
+npx prisma migrate dev --name init
+
+# تشغيل البيانات الأولية
+npx ts-node prisma/seed.ts
 ```
 
-6. (Optional) Seed the database:
-```bash
-npm run prisma:seed
-```
+---
 
-7. Start the development server:
+## ⚙️ الإعداد
+
+### متغيرات البيئة
+
+| المتغير | الوصف | القيمة الافتراضية |
+|---------|-------|-------------------|
+| `NODE_ENV` | بيئة التشغيل | `development` |
+| `PORT` | منفذ الخادم | `3000` |
+| `DATABASE_URL` | رابط اتصال PostgreSQL | - |
+| `JWT_SECRET` | مفتاح تشفير JWT | - |
+| `JWT_ACCESS_EXPIRATION` | مدة صلاحية Access Token | `15m` |
+| `JWT_REFRESH_EXPIRATION` | مدة صلاحية Refresh Token | `7d` |
+| `REDIS_HOST` | خادم Redis | `localhost` |
+| `REDIS_PORT` | منفذ Redis | `6379` |
+| `CORS_ORIGINS` | النطاقات المسموحة | `*` |
+
+---
+
+## 🏃 التشغيل
+
+### التطوير المحلي
+
 ```bash
+# تشغيل Backend
 npm run start:dev
+
+# تشغيل Admin Dashboard (في terminal آخر)
+cd admin && npm run dev
 ```
 
-The API will be available at `http://localhost:3000/api/v1`
-
-## 📚 API Documentation
-
-Once the server is running, visit:
-- Swagger UI: `http://localhost:3000/api/docs`
-- OpenAPI JSON: `http://localhost:3000/api/docs-json`
-
-## 🐳 Docker Commands
+### باستخدام Docker Compose
 
 ```bash
-# Start all services (development)
-npm run docker:dev
+# بناء وتشغيل جميع الخدمات
+docker-compose up -d --build
 
-# Stop all services
-npm run docker:dev:down
+# عرض السجلات
+docker-compose logs -f
 
-# Start all services (production)
-npm run docker:up
-
-# Stop all services
-npm run docker:down
+# إيقاف الخدمات
+docker-compose down
 ```
 
-## 🗄️ Database Commands
+### الوصول للتطبيق
 
-```bash
-# Generate Prisma Client
-npm run prisma:generate
+| الخدمة | الرابط |
+|--------|--------|
+| لوحة التحكم | http://localhost (أو https://admin.sahara2797.com) |
+| API | http://localhost:3000/api/v1 |
+| توثيق API | http://localhost:3000/api/docs |
+| Health Check | http://localhost:3000/health |
 
-# Create a new migration
-npm run prisma:migrate
+### بيانات الدخول الافتراضية
 
-# Deploy migrations (production)
-npm run prisma:deploy
-
-# Seed the database
-npm run prisma:seed
-
-# Open Prisma Studio
-npm run prisma:studio
+```
+البريد الإلكتروني: admin@sahara2797.com
+كلمة المرور: Admin@123456
 ```
 
-## 🧪 Testing
+---
 
-```bash
-# Run unit tests
-npm test
-
-# Run unit tests in watch mode
-npm run test:watch
-
-# Run test coverage
-npm run test:cov
-
-# Run e2e tests
-npm run test:e2e
-```
-
-## 📦 Build
-
-```bash
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-## 📁 Project Structure
+## 📁 بنية المشروع
 
 ```
 NewsCore/
-├── prisma/
-│   ├── schema.prisma        # Prisma schema definition
-│   └── seed.ts              # Database seed script
-├── src/
-│   ├── common/              # Shared utilities, decorators, guards
-│   ├── config/              # Configuration files
-│   ├── database/            # Database service
-│   ├── health/              # Health check module
-│   ├── modules/             # Feature modules (to be added)
-│   ├── app.module.ts        # Root application module
-│   └── main.ts              # Application entry point
-├── test/                    # E2E tests
-├── docker-compose.yml       # Production Docker Compose
-├── docker-compose.dev.yml   # Development Docker Compose
-└── package.json
+├── 📂 admin/                    # لوحة التحكم (React)
+│   ├── 📂 src/
+│   │   ├── 📂 components/       # المكونات المشتركة
+│   │   ├── 📂 pages/            # صفحات التطبيق
+│   │   ├── 📂 lib/              # المكتبات والأدوات
+│   │   ├── 📂 store/            # إدارة الحالة (Zustand)
+│   │   ├── 📄 App.tsx           # المكون الرئيسي
+│   │   └── 📄 main.tsx          # نقطة الدخول
+│   ├── 📄 package.json
+│   ├── 📄 vite.config.ts
+│   ├── 📄 tailwind.config.js
+│   ├── 📄 nginx.conf
+│   └── 📄 Dockerfile
+│
+├── 📂 src/                      # Backend API (NestJS)
+│   ├── 📂 common/               # الأدوات المشتركة
+│   │   ├── 📂 decorators/       # الديكوراتورز المخصصة
+│   │   ├── 📂 dto/              # DTOs المشتركة
+│   │   ├── 📂 filters/          # Exception Filters
+│   │   ├── 📂 guards/           # Guards
+│   │   └── 📂 interceptors/     # Interceptors
+│   │
+│   ├── 📂 config/               # إعدادات التطبيق
+│   │   ├── 📄 configuration.ts
+│   │   └── 📄 validation.schema.ts
+│   │
+│   ├── 📂 database/             # طبقة قاعدة البيانات
+│   │   ├── 📄 database.module.ts
+│   │   └── 📄 prisma.service.ts
+│   │
+│   ├── 📂 health/               # Health Check
+│   │   ├── 📄 health.module.ts
+│   │   └── 📄 health.controller.ts
+│   │
+│   ├── 📂 modules/              # الوحدات الرئيسية
+│   │   ├── 📂 auth/             # المصادقة
+│   │   │   ├── 📂 dto/
+│   │   │   ├── 📂 guards/
+│   │   │   ├── 📂 strategies/
+│   │   │   ├── 📄 auth.module.ts
+│   │   │   ├── 📄 auth.controller.ts
+│   │   │   └── 📄 auth.service.ts
+│   │   │
+│   │   ├── 📂 users/            # المستخدمين
+│   │   ├── 📂 articles/         # المقالات
+│   │   ├── 📂 categories/       # التصنيفات
+│   │   ├── 📂 tags/             # الوسوم
+│   │   └── 📂 media/            # الوسائط
+│   │
+│   ├── 📄 app.module.ts         # الوحدة الرئيسية
+│   ├── 📄 app.controller.ts
+│   └── 📄 main.ts               # نقطة الدخول
+│
+├── 📂 prisma/                   # Prisma ORM
+│   ├── 📄 schema.prisma         # مخطط قاعدة البيانات
+│   ├── 📄 seed.ts               # البيانات الأولية
+│   └── 📂 migrations/           # ترحيلات قاعدة البيانات
+│
+├── 📄 docker-compose.yml        # Docker Compose
+├── 📄 Dockerfile                # Backend Dockerfile
+├── 📄 package.json
+├── 📄 tsconfig.json
+└── 📄 README.md
 ```
 
-## 🔒 Security
+---
 
-- JWT-based authentication with refresh tokens
-- Password hashing with bcrypt
-- Helmet for HTTP headers security
-- CORS configuration
-- Input validation with class-validator
-- SQL injection prevention via Prisma
-- Rate limiting
+## 📚 API Documentation
 
-## 🌍 Environment Variables
+### نقاط النهاية الرئيسية
 
-See `.env.example` for all available environment variables.
+#### 🔐 المصادقة (`/api/v1/auth`)
 
-Key variables:
-- `DATABASE_URL`: PostgreSQL connection string
-- `REDIS_HOST`, `REDIS_PORT`: Redis configuration
-- `JWT_SECRET`: Secret for JWT tokens
-- `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`: S3 storage configuration
-- `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`: AI provider keys
+| Method | Endpoint | الوصف |
+|--------|----------|-------|
+| `POST` | `/login` | تسجيل الدخول |
+| `POST` | `/register` | إنشاء حساب جديد |
+| `POST` | `/refresh` | تجديد الـ Token |
+| `POST` | `/logout` | تسجيل الخروج |
+| `GET` | `/profile` | الملف الشخصي |
 
-## 📝 License
+#### 📝 المقالات (`/api/v1/articles`)
 
-MIT
+| Method | Endpoint | الوصف |
+|--------|----------|-------|
+| `GET` | `/` | قائمة المقالات |
+| `GET` | `/public` | المقالات المنشورة (عام) |
+| `GET` | `/:id` | مقال محدد |
+| `GET` | `/slug/:slug` | مقال بالـ Slug |
+| `POST` | `/` | إنشاء مقال |
+| `PATCH` | `/:id` | تحديث مقال |
+| `POST` | `/:id/publish` | نشر مقال |
+| `POST` | `/:id/archive` | أرشفة مقال |
+| `DELETE` | `/:id` | حذف مقال |
 
-## 🤝 Contributing
+#### 📁 التصنيفات (`/api/v1/categories`)
 
-Contributions are welcome! Please read the contributing guidelines before submitting PRs.
+| Method | Endpoint | الوصف |
+|--------|----------|-------|
+| `GET` | `/` | قائمة التصنيفات |
+| `GET` | `/:id` | تصنيف محدد |
+| `POST` | `/` | إنشاء تصنيف |
+| `PATCH` | `/:id` | تحديث تصنيف |
+| `DELETE` | `/:id` | حذف تصنيف |
 
-## 📧 Support
+#### 🏷️ الوسوم (`/api/v1/tags`)
 
-For support, email support@newscore.com or create an issue in the repository.
+| Method | Endpoint | الوصف |
+|--------|----------|-------|
+| `GET` | `/` | قائمة الوسوم |
+| `GET` | `/:id` | وسم محدد |
+| `POST` | `/` | إنشاء وسم |
+| `PATCH` | `/:id` | تحديث وسم |
+| `DELETE` | `/:id` | حذف وسم |
+
+#### 🖼️ الوسائط (`/api/v1/media`)
+
+| Method | Endpoint | الوصف |
+|--------|----------|-------|
+| `GET` | `/` | قائمة الملفات |
+| `GET` | `/:id` | ملف محدد |
+| `POST` | `/upload` | رفع ملف |
+| `POST` | `/folders` | إنشاء مجلد |
+| `DELETE` | `/:id` | حذف ملف |
+
+#### 👥 المستخدمين (`/api/v1/users`)
+
+| Method | Endpoint | الوصف |
+|--------|----------|-------|
+| `GET` | `/` | قائمة المستخدمين |
+| `GET` | `/:id` | مستخدم محدد |
+| `POST` | `/` | إنشاء مستخدم |
+| `PATCH` | `/:id` | تحديث مستخدم |
+| `DELETE` | `/:id` | حذف مستخدم |
+
+### مثال على الاستخدام
+
+```bash
+# تسجيل الدخول
+curl -X POST https://admin.sahara2797.com/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@sahara2797.com","password":"Admin@123456"}'
+
+# جلب المقالات (مع التوثيق)
+curl https://admin.sahara2797.com/api/v1/articles \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# إنشاء مقال جديد
+curl -X POST https://admin.sahara2797.com/api/v1/articles \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "عنوان المقال",
+    "content": "محتوى المقال...",
+    "status": "DRAFT",
+    "categoryIds": ["category-uuid"],
+    "tagIds": ["tag-uuid"]
+  }'
+```
+
+---
+
+## 🗄️ قاعدة البيانات
+
+### المخطط الرئيسي
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│    User     │────<│   Article   │>────│  Category   │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                   │                   │
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│    Role     │     │    Tag      │     │   Media     │
+└─────────────┘     └─────────────┘     └─────────────┘
+```
+
+### الجداول الرئيسية
+
+| الجدول | الوصف |
+|--------|-------|
+| `users` | المستخدمين |
+| `roles` | الأدوار |
+| `permissions` | الصلاحيات |
+| `articles` | المقالات |
+| `categories` | التصنيفات |
+| `tags` | الوسوم |
+| `media` | الوسائط |
+| `media_folders` | مجلدات الوسائط |
+
+### أوامر Prisma المفيدة
+
+```bash
+# عرض قاعدة البيانات في المتصفح
+npx prisma studio
+
+# إنشاء ترحيل جديد
+npx prisma migrate dev --name migration_name
+
+# تطبيق الترحيلات
+npx prisma migrate deploy
+
+# إعادة توليد Prisma Client
+npx prisma generate
+
+# إعادة تعيين قاعدة البيانات
+npx prisma migrate reset
+```
+
+---
+
+## 🚢 النشر
+
+### النشر بـ Docker Compose
+
+```bash
+# بناء الصور
+docker-compose build
+
+# تشغيل في الخلفية
+docker-compose up -d
+
+# تطبيق ترحيلات قاعدة البيانات
+docker exec newscore-api npx prisma migrate deploy
+
+# تشغيل البيانات الأولية
+docker exec newscore-api npx ts-node prisma/seed.ts
+```
+
+### النشر مع Traefik
+
+المشروع مُعد للعمل مع Traefik كـ reverse proxy. تأكد من:
+
+1. وجود شبكة `routy-traefik_web` خارجية
+2. إعداد DNS للنطاق المطلوب
+3. تفعيل SSL عبر Let's Encrypt
+
+```yaml
+# Labels في docker-compose.yml
+labels:
+  - "traefik.enable=true"
+  - "traefik.http.routers.newscore-admin.rule=Host(`admin.example.com`)"
+  - "traefik.http.routers.newscore-admin.tls.certresolver=lehttp"
+```
+
+---
+
+## 🧪 الاختبارات
+
+```bash
+# تشغيل الاختبارات
+npm run test
+
+# تشغيل الاختبارات مع التغطية
+npm run test:cov
+
+# اختبارات E2E
+npm run test:e2e
+```
+
+---
+
+## 🤝 المساهمة
+
+نرحب بمساهماتكم! يرجى اتباع الخطوات التالية:
+
+1. Fork المشروع
+2. إنشاء فرع جديد (`git checkout -b feature/amazing-feature`)
+3. Commit التغييرات (`git commit -m 'Add amazing feature'`)
+4. Push إلى الفرع (`git push origin feature/amazing-feature`)
+5. فتح Pull Request
+
+---
+
+## 📄 الترخيص
+
+هذا المشروع مرخص تحت رخصة MIT - راجع ملف [LICENSE](LICENSE) للتفاصيل.
+
+---
+
+## 📞 الدعم
+
+- 📧 البريد الإلكتروني: support@sahara2797.com
+- 🐛 الإبلاغ عن مشاكل: [GitHub Issues](../../issues)
+- 📖 التوثيق: [API Docs](https://admin.sahara2797.com/api/docs)
+
+---
+
+<div align="center">
+
+**صُنع بـ ❤️ للمجتمع العربي**
+
+</div>
