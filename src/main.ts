@@ -17,9 +17,12 @@ async function bootstrap(): Promise<void> {
   );
 
   // CORS
+  const corsOrigins = process.env.CORS_ORIGINS || '*';
   app.enableCors({
-    origin: configService.get<string>('CORS_ORIGINS', '*').split(','),
+    origin: corsOrigins === '*' ? '*' : corsOrigins.split(','),
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   // API Prefix - simple prefix without versioning

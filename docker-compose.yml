@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   newscore-api:
     build:
@@ -25,37 +23,25 @@ services:
     networks:
       - newscore_network
       - routy-traefik_web
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  newscore-admin:
-    build:
-      context: ./admin
-      dockerfile: Dockerfile
-    container_name: newscore-admin
-    restart: unless-stopped
-    depends_on:
-      - newscore-api
-    networks:
-      - newscore_network
-      - routy-traefik_web
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=routy-traefik_web"
       # HTTP to HTTPS redirect
-      - "traefik.http.routers.newscore-admin-web.rule=Host(`admin.sahara2797.com`)"
-      - "traefik.http.routers.newscore-admin-web.entrypoints=web"
-      - "traefik.http.routers.newscore-admin-web.middlewares=https-redirect"
+      - "traefik.http.routers.newscore-api-web.rule=Host(`admin.sahara2797.com`)"
+      - "traefik.http.routers.newscore-api-web.entrypoints=web"
+      - "traefik.http.routers.newscore-api-web.middlewares=https-redirect"
       # HTTPS
-      - "traefik.http.routers.newscore-admin.rule=Host(`admin.sahara2797.com`)"
-      - "traefik.http.routers.newscore-admin.entrypoints=websecure"
-      - "traefik.http.routers.newscore-admin.tls.certresolver=lehttp"
-      - "traefik.http.routers.newscore-admin.service=newscore-admin"
-      - "traefik.http.services.newscore-admin.loadbalancer.server.port=80"
+      - "traefik.http.routers.newscore-api.rule=Host(`admin.sahara2797.com`)"
+      - "traefik.http.routers.newscore-api.entrypoints=websecure"
+      - "traefik.http.routers.newscore-api.tls.certresolver=lehttp"
+      - "traefik.http.routers.newscore-api.service=newscore-api"
+      - "traefik.http.services.newscore-api.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   postgres:
     image: postgres:16-alpine
