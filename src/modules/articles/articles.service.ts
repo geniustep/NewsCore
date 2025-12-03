@@ -138,7 +138,7 @@ export class ArticlesService {
     }
 
     const orderBy: any = {};
-    if (query.sortBy === 'viewsTotal') {
+    if (query.sortBy === 'viewsTotal' || query.sortBy === 'viewCount') {
       orderBy.analytics = { viewsTotal: query.sortOrder || 'desc' };
     } else {
       orderBy[query.sortBy || 'createdAt'] = query.sortOrder || 'desc';

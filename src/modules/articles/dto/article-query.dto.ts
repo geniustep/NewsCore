@@ -58,7 +58,7 @@ export class ArticleQueryDto extends PaginationDto {
   @IsOptional()
   isBreaking?: boolean;
 
-  @ApiPropertyOptional({ enum: ['createdAt', 'publishedAt', 'title', 'viewsTotal'] })
+  @ApiPropertyOptional({ enum: ['createdAt', 'publishedAt', 'title', 'viewsTotal', 'viewCount'] })
   @IsString()
   @IsOptional()
   sortBy?: string = 'createdAt';

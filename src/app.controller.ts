@@ -16,6 +16,7 @@ export class AppController {
         '/api/v1/articles',
         '/api/v1/categories',
         '/api/v1/tags',
+        '/api/v1/menus',
       ],
     };
   }

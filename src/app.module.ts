@@ -15,6 +15,7 @@ import { ArticlesModule } from './modules/articles/articles.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { MediaModule } from './modules/media/media.module';
+import { MenusModule } from './modules/menus/menus.module';
 
 import { AppController } from './app.controller';
 import { JwtAuthGuard } from './modules/auth/guards';
@@ -41,6 +42,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     CategoriesModule,
     TagsModule,
     MediaModule,
+    MenusModule,
   ],
   controllers: [AppController],
   providers: [

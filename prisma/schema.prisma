@@ -43,6 +43,7 @@ model User {
   auditLogs       AuditLog[]
   notifications   Notification[]
   preferences     UserPreference?
+  menuRevisions   MenuRevision[]
 
   @@index([email])
   @@index([status])
@@ -226,6 +227,7 @@ model Article {
   ingestedItemId  String?       @unique @map("ingested_item_id") @db.Uuid
   analytics       ArticleAnalytics?
   events          AnalyticsEvent[]
+  menuItems       MenuItem[]
 
   @@index([slug])
   @@index([status])
@@ -358,6 +360,7 @@ model Category {
   parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
   children Category[] @relation("CategoryHierarchy")
   articles ArticleCategory[]
+  menuItems MenuItem[]
 
   @@index([slug])
   @@index([parentId])
@@ -378,6 +381,7 @@ model Tag {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   articles ArticleTag[]
+  menuItems MenuItem[]
 
   @@index([slug])
   @@index([type])
@@ -863,4 +867,155 @@ model Setting {
   @@index([group])
   @@index([isPublic])
   @@map("settings")
+}
+
+// ============================================
+// NAVIGATION MENUS
+// ============================================
+
+model Menu {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  isSystem    Boolean  @default(false) @map("is_system")
+  
+  // Styling options
+  cssClass    String?  @map("css_class") @db.VarChar(200)
+  theme       String?  @db.VarChar(50)
+  
+  // Permissions
+  createdById String?  @map("created_by_id") @db.Uuid
+  updatedById String?  @map("updated_by_id") @db.Uuid
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  items       MenuItem[]
+  locations   MenuLocation[]
+  revisions   MenuRevision[]
+  
+  @@index([slug])
+  @@index([isActive])
+  @@map("menus")
+}
+
+model MenuItem {
+  id          String      @id @default(uuid()) @db.Uuid
+  menuId      String      @map("menu_id") @db.Uuid
+  parentId    String?     @map("parent_id") @db.Uuid
+  
+  // Item content
+  label       String      @db.VarChar(200)
+  labelAr     String?     @map("label_ar") @db.VarChar(200)
+  labelEn     String?     @map("label_en") @db.VarChar(200)
+  labelFr     String?     @map("label_fr") @db.VarChar(200)
+  
+  // Item type and target
+  type        MenuItemType
+  target      String?     @db.VarChar(50) // _self, _blank, etc.
+  
+  // Link configuration
+  url         String?     @db.VarChar(1000) // For CUSTOM type
+  categoryId  String?     @map("category_id") @db.Uuid // For CATEGORY type
+  tagId       String?     @map("tag_id") @db.Uuid // For TAG type
+  articleId   String?     @map("article_id") @db.Uuid // For ARTICLE type
+  pageId      String?     @map("page_id") @db.Uuid // For PAGE type
+  
+  // Display options
+  icon        String?     @db.VarChar(100)
+  imageUrl    String?     @map("image_url") @db.VarChar(500)
+  description String?     @db.Text
+  cssClass    String?     @map("css_class") @db.VarChar(200)
+  
+  // Mega Menu configuration
+  isMegaMenu  Boolean     @default(false) @map("is_mega_menu")
+  megaMenuLayout String?  @map("mega_menu_layout") @db.VarChar(50) // grid-2, grid-3, grid-4, full
+  megaMenuContent Json?   @map("mega_menu_content") // Articles, categories, custom HTML
+  
+  // Visibility
+  isActive    Boolean     @default(true) @map("is_active")
+  isVisible   Boolean     @default(true) @map("is_visible")
+  showOnMobile Boolean    @default(true) @map("show_on_mobile")
+  showOnDesktop Boolean   @default(true) @map("show_on_desktop")
+  
+  // Conditional display
+  displayConditions Json?  @map("display_conditions") // { deviceType, userRole, language, etc. }
+  
+  // Ordering
+  sortOrder   Int         @default(0) @map("sort_order")
+  
+  // SEO
+  seoTitle    String?     @map("seo_title") @db.VarChar(200)
+  seoDescription String?  @map("seo_description") @db.VarChar(300)
+  
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  
+  // Relations
+  menu        Menu        @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parent      MenuItem?   @relation("MenuItemHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    MenuItem[]  @relation("MenuItemHierarchy")
+  category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tag         Tag?        @relation(fields: [tagId], references: [id], onDelete: SetNull)
+  article     Article?    @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  
+  @@index([menuId])
+  @@index([parentId])
+  @@index([sortOrder])
+  @@index([isActive])
+  @@map("menu_items")
+}
+
+enum MenuItemType {
+  CUSTOM      // Custom URL
+  CATEGORY    // Link to category
+  TAG         // Link to tag
+  ARTICLE     // Link to specific article
+  PAGE        // Link to static page
+  DIVIDER     // Visual divider
+  HEADING     // Section heading (for mega menu)
+  DYNAMIC     // Dynamic content (latest articles, trending, etc.)
+}
+
+model MenuLocation {
+  id          String   @id @default(uuid()) @db.Uuid
+  menuId      String   @map("menu_id") @db.Uuid
+  location    String   @db.VarChar(50) // header, footer, sidebar-left, sidebar-right, mobile, etc.
+  priority    Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  // Conditional display
+  conditions  Json?    // { language, deviceType, userRole, etc. }
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  menu        Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  
+  @@unique([menuId, location])
+  @@index([location])
+  @@index([isActive])
+  @@map("menu_locations")
+}
+
+model MenuRevision {
+  id          String   @id @default(uuid()) @db.Uuid
+  menuId      String   @map("menu_id") @db.Uuid
+  version     Int
+  data        Json     // Full menu structure snapshot
+  changes     Json?    // What changed
+  reason      String?  @db.VarChar(500)
+  createdById String   @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  menu        Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  
+  @@unique([menuId, version])
+  @@index([menuId])
+  @@index([createdAt])
+  @@map("menu_revisions")
 }
