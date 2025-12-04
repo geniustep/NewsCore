@@ -870,6 +870,116 @@ model Setting {
 }
 
 // ============================================
+// PAGES (Static Pages like WordPress)
+// ============================================
+
+model Page {
+  id              String      @id @default(uuid()) @db.Uuid
+  slug            String      @unique @db.VarChar(300)
+  status          PageStatus  @default(DRAFT)
+  language        String      @default("ar") @db.VarChar(10)
+  
+  // Content
+  title           String      @db.VarChar(500)
+  content         String      @db.Text
+  contentHtml     String?     @map("content_html") @db.Text
+  excerpt         String?     @db.Text
+  
+  // Media
+  featuredImageUrl String?    @map("featured_image_url") @db.VarChar(500)
+  featuredImageAlt String?    @map("featured_image_alt") @db.VarChar(300)
+  
+  // Page hierarchy
+  parentId        String?     @map("parent_id") @db.Uuid
+  sortOrder       Int         @default(0) @map("sort_order")
+  
+  // Page type
+  template        String      @default("default") @db.VarChar(50) // default, full-width, sidebar, contact, etc.
+  isHomepage      Boolean     @default(false) @map("is_homepage")
+  isSystem        Boolean     @default(false) @map("is_system") // Cannot be deleted
+  
+  // SEO
+  seoTitle        String?     @map("seo_title") @db.VarChar(70)
+  seoDescription  String?     @map("seo_description") @db.VarChar(160)
+  seoKeywords     String[]    @map("seo_keywords")
+  canonicalUrl    String?     @map("canonical_url") @db.VarChar(500)
+  
+  // Settings
+  allowComments   Boolean     @default(false) @map("allow_comments")
+  showInMenu      Boolean     @default(false) @map("show_in_menu")
+  
+  // Author
+  authorId        String      @map("author_id") @db.Uuid
+  editorId        String?     @map("editor_id") @db.Uuid
+  
+  // Timestamps
+  publishedAt     DateTime?   @map("published_at")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  deletedAt       DateTime?   @map("deleted_at")
+  
+  // Relations
+  parent          Page?       @relation("PageHierarchy", fields: [parentId], references: [id])
+  children        Page[]      @relation("PageHierarchy")
+  translations    PageTranslation[]
+  versions        PageVersion[]
+  menuItems       MenuItem[]
+  
+  @@index([slug])
+  @@index([status])
+  @@index([language])
+  @@index([parentId])
+  @@index([isHomepage])
+  @@index([sortOrder])
+  @@map("pages")
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model PageTranslation {
+  id              String   @id @default(uuid()) @db.Uuid
+  pageId          String   @map("page_id") @db.Uuid
+  language        String   @db.VarChar(10)
+  title           String   @db.VarChar(500)
+  content         String   @db.Text
+  excerpt         String?  @db.Text
+  seoTitle        String?  @map("seo_title") @db.VarChar(70)
+  seoDescription  String?  @map("seo_description") @db.VarChar(160)
+  translationType TranslationType @default(MANUAL) @map("translation_type")
+  isReviewed      Boolean  @default(false) @map("is_reviewed")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  
+  @@unique([pageId, language])
+  @@index([pageId])
+  @@map("page_translations")
+}
+
+model PageVersion {
+  id          String   @id @default(uuid()) @db.Uuid
+  pageId      String   @map("page_id") @db.Uuid
+  version     Int
+  title       String   @db.VarChar(500)
+  content     String   @db.Text
+  changes     Json?
+  reason      String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at")
+  createdById String   @map("created_by_id") @db.Uuid
+  
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  
+  @@unique([pageId, version])
+  @@index([pageId])
+  @@map("page_versions")
+}
+
+// ============================================
 // NAVIGATION MENUS
 // ============================================
 
@@ -961,6 +1071,7 @@ model MenuItem {
   category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   tag         Tag?        @relation(fields: [tagId], references: [id], onDelete: SetNull)
   article     Article?    @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  page        Page?       @relation(fields: [pageId], references: [id], onDelete: SetNull)
   
   @@index([menuId])
   @@index([parentId])

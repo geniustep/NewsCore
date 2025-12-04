@@ -26,6 +26,13 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=routy-traefik_web"
+      # CORS Headers Middleware - Dynamic origin based on request
+      - "traefik.http.middlewares.cors-headers.headers.accessControlAllowMethods=GET,OPTIONS,PUT,POST,DELETE,PATCH,HEAD"
+      - "traefik.http.middlewares.cors-headers.headers.accessControlAllowOriginList=*"
+      - "traefik.http.middlewares.cors-headers.headers.accessControlAllowCredentials=true"
+      - "traefik.http.middlewares.cors-headers.headers.accessControlAllowHeaders=Content-Type,Authorization,Accept,X-Requested-With"
+      - "traefik.http.middlewares.cors-headers.headers.accessControlMaxAge=100"
+      - "traefik.http.middlewares.cors-headers.headers.addVaryHeader=true"
       # HTTP to HTTPS redirect
       - "traefik.http.routers.newscore-api-web.rule=Host(`admin.sahara2797.com`)"
       - "traefik.http.routers.newscore-api-web.entrypoints=web"
@@ -34,6 +41,7 @@ services:
       - "traefik.http.routers.newscore-api.rule=Host(`admin.sahara2797.com`)"
       - "traefik.http.routers.newscore-api.entrypoints=websecure"
       - "traefik.http.routers.newscore-api.tls.certresolver=lehttp"
+      - "traefik.http.routers.newscore-api.middlewares=cors-headers"
       - "traefik.http.routers.newscore-api.service=newscore-api"
       - "traefik.http.services.newscore-api.loadbalancer.server.port=3000"
     healthcheck:

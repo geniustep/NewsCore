@@ -312,7 +312,7 @@ export class MenusService {
     };
 
     if (dto.name && !dto.slug) {
-      updateData.slug = SlugUtil.generateUnique(dto.name, id);
+      updateData.slug = SlugUtil.generateUnique(dto.name);
     }
 
     return this.prisma.menu.update({

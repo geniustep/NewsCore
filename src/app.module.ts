@@ -16,11 +16,13 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { MediaModule } from './modules/media/media.module';
 import { MenusModule } from './modules/menus/menus.module';
+import { PagesModule } from './modules/pages/pages.module';
 
 import { AppController } from './app.controller';
 import { JwtAuthGuard } from './modules/auth/guards';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { CorsInterceptor } from './common/interceptors/cors.interceptor';
 
 @Module({
   imports: [
@@ -43,6 +45,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     TagsModule,
     MediaModule,
     MenusModule,
+    PagesModule,
   ],
   controllers: [AppController],
   providers: [
@@ -57,6 +60,10 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CorsInterceptor,
     },
   ],
 })

@@ -80,11 +80,33 @@
 - وسوم مرنة
 - ربط المقالات بتصنيفات ووسوم متعددة
 
+### 🎯 نظام إدارة القوائم الاحترافي
+- **قوائم متعددة مستقلة**: إنشاء عدد غير محدود من القوائم (Header, Footer, Sidebar, Mobile, Mega Menu)
+- **Menu Locations**: التحكم في أماكن ظهور القوائم (Header, Footer-1/2/3/4, Sidebar, Mobile)
+- **أنواع عناصر متعددة**: Link, Category, Tag, Article, Page, Custom URL, Divider, Heading
+- **Mega Menu Builder**: نظام احترافي لبناء قوائم ميجا مع Grid Layout (2/3/4 columns)
+- **قوائم متداخلة**: دعم قوائم منسدلة متعددة المستويات
+- **إضافة أيقونات وصور**: لكل عنصر في القائمة
+- **إدارة مرئية**: تفعيل/تعطيل عناصر بدون حذفها
+- **سحب وإفلات**: إعادة ترتيب العناصر (قريباً)
+- **دعم متعدد اللغات**: ترجمة تلقائية لكل عنصر (ar, en, fr)
+- **Conditional Display**: عرض مشروط حسب الجهاز، اللغة، أو حالة المستخدم
+- **Dynamic Menus**: قوائم ديناميكية (أحدث الأقسام، وسوم نشطة)
+- **SEO Friendly**: HTML5 nav، روابط نظيفة، Schema.org
+- **Import/Export**: استيراد وتصدير القوائم بصيغة JSON
+
 ### 📊 لوحة التحكم
 - إحصائيات شاملة
 - واجهة حديثة وسهلة الاستخدام
 - دعم كامل للغة العربية (RTL)
 - تصميم متجاوب لجميع الأجهزة
+
+### 🌐 الواجهة الأمامية (Frontend)
+- **Next.js 14** مع App Router
+- **دعم متعدد اللغات**: next-intl (ar, en, fr)
+- **تصميم متجاوب**: TailwindCSS مع RTL support
+- **قوائم ديناميكية**: تكامل كامل مع نظام إدارة القوائم
+- **SSR/SSG**: Server-Side Rendering و Static Site Generation
 
 ---
 
@@ -118,7 +140,10 @@ cd NewsCore
 npm install
 
 # Admin Dashboard
-cd admin && npm install && cd ..
+cd NewsCore-admin && npm install && cd ..
+
+# Frontend
+cd NewsCore-frontend && npm install && cd ..
 ```
 
 ### 3. إعداد متغيرات البيئة
@@ -185,8 +210,21 @@ npx ts-node prisma/seed.ts
 npm run start:dev
 
 # تشغيل Admin Dashboard (في terminal آخر)
-cd admin && npm run dev
+cd NewsCore-admin && npm run dev
+
+# تشغيل Frontend (في terminal آخر)
+cd NewsCore-frontend && npm run dev
 ```
+
+### الوصول للتطبيق
+
+| الخدمة | الرابط |
+|--------|--------|
+| لوحة التحكم (Admin) | http://localhost:5173 |
+| الواجهة الأمامية (Frontend) | http://localhost:3000 |
+| API | http://localhost:3000/api/v1 |
+| توثيق API | http://localhost:3000/api/docs |
+| Health Check | http://localhost:3000/health |
 
 ### باستخدام Docker Compose
 
@@ -201,14 +239,6 @@ docker-compose logs -f
 docker-compose down
 ```
 
-### الوصول للتطبيق
-
-| الخدمة | الرابط |
-|--------|--------|
-| لوحة التحكم | http://localhost (أو https://admin.sahara2797.com) |
-| API | http://localhost:3000/api/v1 |
-| توثيق API | http://localhost:3000/api/docs |
-| Health Check | http://localhost:3000/health |
 
 ### بيانات الدخول الافتراضية
 
@@ -223,19 +253,33 @@ docker-compose down
 
 ```
 NewsCore/
-├── 📂 admin/                    # لوحة التحكم (React)
+├── 📂 NewsCore-admin/            # لوحة التحكم (React + Vite)
 │   ├── 📂 src/
 │   │   ├── 📂 components/       # المكونات المشتركة
-│   │   ├── 📂 pages/            # صفحات التطبيق
-│   │   ├── 📂 lib/              # المكتبات والأدوات
+│   │   ├── 📂 pages/            # صفحات التطبيق (Articles, Categories, Menus, etc.)
+│   │   ├── 📂 lib/              # المكتبات والأدوات (API client)
 │   │   ├── 📂 store/            # إدارة الحالة (Zustand)
 │   │   ├── 📄 App.tsx           # المكون الرئيسي
 │   │   └── 📄 main.tsx          # نقطة الدخول
 │   ├── 📄 package.json
 │   ├── 📄 vite.config.ts
-│   ├── 📄 tailwind.config.js
-│   ├── 📄 nginx.conf
-│   └── 📄 Dockerfile
+│   └── 📄 tailwind.config.js
+│
+├── 📂 NewsCore-frontend/        # الواجهة الأمامية (Next.js 14)
+│   ├── 📂 app/                   # App Router
+│   │   ├── 📂 [locale]/         # صفحات متعددة اللغات
+│   │   │   ├── 📂 article/      # صفحات المقالات
+│   │   │   ├── 📂 category/     # صفحات التصنيفات
+│   │   │   └── 📄 page.tsx      # الصفحة الرئيسية
+│   │   └── 📄 layout.tsx         # Root Layout
+│   ├── 📂 components/           # المكونات
+│   │   ├── 📂 layout/           # Header, Footer
+│   │   └── 📂 menus/            # MenuRenderer, MegaMenu
+│   ├── 📂 lib/                  # المكتبات
+│   │   └── 📂 api/              # API clients
+│   ├── 📂 public/               # الملفات الثابتة
+│   ├── 📄 package.json
+│   └── 📄 next.config.mjs
 │
 ├── 📂 src/                      # Backend API (NestJS)
 │   ├── 📂 common/               # الأدوات المشتركة
@@ -270,7 +314,12 @@ NewsCore/
 │   │   ├── 📂 articles/         # المقالات
 │   │   ├── 📂 categories/       # التصنيفات
 │   │   ├── 📂 tags/             # الوسوم
-│   │   └── 📂 media/            # الوسائط
+│   │   ├── 📂 media/            # الوسائط
+│   │   └── 📂 menus/            # إدارة القوائم
+│   │       ├── 📂 dto/          # Data Transfer Objects
+│   │       ├── 📄 menus.module.ts
+│   │       ├── 📄 menus.controller.ts
+│   │       └── 📄 menus.service.ts
 │   │
 │   ├── 📄 app.module.ts         # الوحدة الرئيسية
 │   ├── 📄 app.controller.ts
@@ -358,6 +407,26 @@ NewsCore/
 | `PATCH` | `/:id` | تحديث مستخدم |
 | `DELETE` | `/:id` | حذف مستخدم |
 
+#### 🎯 القوائم (`/api/v1/menus`)
+
+| Method | Endpoint | الوصف |
+|--------|----------|-------|
+| `GET` | `/` | قائمة جميع القوائم |
+| `GET` | `/public` | القوائم العامة (بدون مصادقة) |
+| `GET` | `/location/:location` | قائمة حسب الموقع (header, footer-1, etc.) |
+| `GET` | `/slug/:slug` | قائمة حسب الـ slug |
+| `GET` | `/:id` | قائمة محددة |
+| `POST` | `/` | إنشاء قائمة جديدة |
+| `PATCH` | `/:id` | تحديث قائمة |
+| `DELETE` | `/:id` | حذف قائمة |
+| `POST` | `/:menuId/items` | إضافة عنصر للقائمة |
+| `PATCH` | `/items/:id` | تحديث عنصر |
+| `DELETE` | `/items/:id` | حذف عنصر |
+| `POST` | `/:menuId/items/reorder` | إعادة ترتيب العناصر |
+| `POST` | `/:menuId/locations` | تعيين موقع للقائمة |
+| `DELETE` | `/:menuId/locations/:location` | إزالة موقع من القائمة |
+| `GET` | `/dynamic/:type` | قوائم ديناميكية (categories, tags, etc.) |
+
 ### مثال على الاستخدام
 
 ```bash
@@ -380,6 +449,42 @@ curl -X POST https://admin.sahara2797.com/api/v1/articles \
     "status": "DRAFT",
     "categoryIds": ["category-uuid"],
     "tagIds": ["tag-uuid"]
+  }'
+
+# جلب قائمة حسب الموقع (عام - بدون مصادقة)
+curl https://admin.sahara2797.com/api/v1/menus/location/header?language=ar
+
+# إنشاء قائمة جديدة
+curl -X POST https://admin.sahara2797.com/api/v1/menus \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "القائمة الرئيسية",
+    "slug": "main-menu",
+    "description": "قائمة التنقل الرئيسية"
+  }'
+
+# إضافة عنصر للقائمة
+curl -X POST https://admin.sahara2797.com/api/v1/menus/{menuId}/items \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "الرئيسية",
+    "labelAr": "الرئيسية",
+    "labelEn": "Home",
+    "type": "CUSTOM",
+    "url": "/",
+    "icon": "🏠",
+    "sortOrder": 0
+  }'
+
+# تعيين موقع للقائمة
+curl -X POST https://admin.sahara2797.com/api/v1/menus/{menuId}/locations \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "location": "header",
+    "priority": 0
   }'
 ```
 
@@ -413,6 +518,10 @@ curl -X POST https://admin.sahara2797.com/api/v1/articles \
 | `tags` | الوسوم |
 | `media` | الوسائط |
 | `media_folders` | مجلدات الوسائط |
+| `menus` | القوائم |
+| `menu_items` | عناصر القوائم |
+| `menu_locations` | مواقع القوائم |
+| `menu_revisions` | نسخ القوائم (History) |
 
 ### أوامر Prisma المفيدة
 
@@ -452,6 +561,21 @@ docker exec newscore-api npx prisma migrate deploy
 # تشغيل البيانات الأولية
 docker exec newscore-api npx ts-node prisma/seed.ts
 ```
+
+### النشر على Vercel (Frontend & Admin)
+
+#### Frontend (Next.js)
+1. اربط المستودع مع Vercel
+2. اضبط Environment Variables:
+   - `NEXT_PUBLIC_API_URL`: رابط API (مثال: `https://admin.sahara2797.com/api/v1`)
+3. Vercel سيقوم بالبناء والنشر تلقائياً
+
+#### Admin Panel (Vite)
+1. اربط المستودع مع Vercel
+2. اضبط Environment Variables:
+   - `VITE_API_URL`: رابط API (مثال: `https://admin.sahara2797.com/api/v1`)
+3. اضبط Build Command: `npm run build`
+4. اضبط Output Directory: `dist`
 
 ### النشر مع Traefik
 
@@ -501,6 +625,66 @@ npm run test:e2e
 ## 📄 الترخيص
 
 هذا المشروع مرخص تحت رخصة MIT - راجع ملف [LICENSE](LICENSE) للتفاصيل.
+
+---
+
+## 📖 دليل استخدام نظام القوائم
+
+### إنشاء قائمة جديدة
+
+1. انتقل إلى **القوائم** في لوحة التحكم
+2. اضغط على **إضافة قائمة جديدة**
+3. املأ البيانات:
+   - **الاسم**: اسم القائمة (مثال: "القائمة الرئيسية")
+   - **Slug**: معرف فريد (مثال: "main-menu")
+   - **الوصف**: وصف اختياري
+4. احفظ القائمة
+
+### إضافة عناصر للقائمة
+
+1. اختر القائمة من القائمة
+2. اضغط على **إضافة عنصر**
+3. اختر نوع العنصر:
+   - **CUSTOM**: رابط مخصص
+   - **CATEGORY**: رابط لتصنيف
+   - **TAG**: رابط لوسم
+   - **ARTICLE**: رابط لمقال
+   - **DIVIDER**: فاصل
+   - **HEADING**: عنوان
+4. املأ البيانات (Label, URL, Icon, etc.)
+5. احفظ العنصر
+
+### تعيين موقع للقائمة
+
+1. اختر القائمة
+2. في قسم **Menu Locations**، اضغط **إضافة موقع**
+3. اختر الموقع:
+   - `header`: القائمة الرئيسية في الهيدر
+   - `footer-1`, `footer-2`, `footer-3`, `footer-4`: قوائم الفوتر
+   - `sidebar`: القائمة الجانبية
+   - `mobile`: قائمة الموبايل
+4. اضبط الأولوية (Priority)
+5. احفظ
+
+### إنشاء Mega Menu
+
+1. أنشئ عنصر قائمة عادي
+2. فعّل **Mega Menu**
+3. اختر Layout (Grid 2/3/4 columns)
+4. أضف عناصر فرعية للعنصر
+5. كل عنصر فرعي سيظهر في عمود من الميجا مينيو
+
+### استخدام القوائم في Frontend
+
+القوائم تُجلب تلقائياً في `Header` و `Footer` حسب الموقع:
+
+```typescript
+// في Header.tsx
+const headerMenu = await menusApi.getByLocation('header', locale);
+
+// في Footer.tsx
+const footerMenu = await menusApi.getByLocation('footer-1', locale);
+```
 
 ---
 
