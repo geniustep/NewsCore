@@ -260,6 +260,186 @@ async function main() {
 
   console.log('✅ Default tags created');
 
+  // Create Default Pages
+  const homePage = await prisma.page.upsert({
+    where: { slug: 'home' },
+    update: {},
+    create: {
+      slug: 'home',
+      title: 'الصفحة الرئيسية',
+      content: '<h1>مرحباً بكم في موقعنا الإخباري</h1><p>أهلاً بكم في منصتنا الإخبارية المتميزة.</p>',
+      status: 'PUBLISHED',
+      language: 'ar',
+      template: 'default',
+      isHomepage: true,
+      isSystem: true,
+      authorId: adminUser.id,
+      publishedAt: new Date(),
+    },
+  });
+
+  await prisma.page.upsert({
+    where: { slug: 'about' },
+    update: {},
+    create: {
+      slug: 'about',
+      title: 'من نحن',
+      content: '<h1>من نحن</h1><p>نحن منصة إخبارية موثوقة تقدم أحدث الأخبار والتقارير.</p>',
+      status: 'PUBLISHED',
+      language: 'ar',
+      template: 'default',
+      isHomepage: false,
+      isSystem: false,
+      showInMenu: true,
+      authorId: adminUser.id,
+      publishedAt: new Date(),
+    },
+  });
+
+  await prisma.page.upsert({
+    where: { slug: 'contact' },
+    update: {},
+    create: {
+      slug: 'contact',
+      title: 'اتصل بنا',
+      content: '<h1>اتصل بنا</h1><p>يمكنكم التواصل معنا عبر البريد الإلكتروني أو وسائل التواصل الاجتماعي.</p>',
+      status: 'PUBLISHED',
+      language: 'ar',
+      template: 'contact',
+      isHomepage: false,
+      isSystem: false,
+      showInMenu: true,
+      authorId: adminUser.id,
+      publishedAt: new Date(),
+    },
+  });
+
+  await prisma.page.upsert({
+    where: { slug: 'privacy-policy' },
+    update: {},
+    create: {
+      slug: 'privacy-policy',
+      title: 'سياسة الخصوصية',
+      content: '<h1>سياسة الخصوصية</h1><p>نحن نحترم خصوصيتكم ونلتزم بحماية بياناتكم الشخصية.</p>',
+      status: 'PUBLISHED',
+      language: 'ar',
+      template: 'default',
+      isHomepage: false,
+      isSystem: true,
+      showInMenu: false,
+      authorId: adminUser.id,
+      publishedAt: new Date(),
+    },
+  });
+
+  await prisma.page.upsert({
+    where: { slug: 'terms-of-service' },
+    update: {},
+    create: {
+      slug: 'terms-of-service',
+      title: 'شروط الاستخدام',
+      content: '<h1>شروط الاستخدام</h1><p>باستخدام هذا الموقع، فإنك توافق على الشروط والأحكام التالية.</p>',
+      status: 'PUBLISHED',
+      language: 'ar',
+      template: 'default',
+      isHomepage: false,
+      isSystem: true,
+      showInMenu: false,
+      authorId: adminUser.id,
+      publishedAt: new Date(),
+    },
+  });
+
+  console.log('✅ Default pages created');
+
+  // Create Default Menu
+  const mainMenu = await prisma.menu.upsert({
+    where: { slug: 'main-menu' },
+    update: {},
+    create: {
+      slug: 'main-menu',
+      name: 'القائمة الرئيسية',
+      description: 'القائمة الرئيسية للموقع',
+      isActive: true,
+      isSystem: true,
+      createdById: adminUser.id,
+    },
+  });
+
+  // Fetch categories for menu items
+  const allCategories = await prisma.category.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: 'asc' },
+  });
+
+  // Create menu items for categories
+  let sortOrder = 0;
+  for (const category of allCategories) {
+    // Check if menu item for this category already exists
+    const existingItem = await prisma.menuItem.findFirst({
+      where: {
+        menuId: mainMenu.id,
+        categoryId: category.id,
+      },
+    });
+    
+    if (!existingItem) {
+      await prisma.menuItem.create({
+        data: {
+          menuId: mainMenu.id,
+          label: category.nameAr || category.name,
+          labelAr: category.nameAr,
+          labelEn: category.nameEn,
+          type: 'CATEGORY',
+          categoryId: category.id,
+          sortOrder: sortOrder,
+          isActive: true,
+          isVisible: true,
+        },
+      });
+    }
+    sortOrder++;
+  }
+
+  console.log('✅ Default menu created');
+
+  // Create Footer Menu
+  const footerMenu = await prisma.menu.upsert({
+    where: { slug: 'footer-menu' },
+    update: {},
+    create: {
+      slug: 'footer-menu',
+      name: 'قائمة التذييل',
+      description: 'قائمة روابط التذييل',
+      isActive: true,
+      isSystem: true,
+      createdById: adminUser.id,
+    },
+  });
+
+  // Add footer menu items
+  const footerPages = await prisma.page.findMany({
+    where: { showInMenu: true },
+  });
+
+  let footerSortOrder = 0;
+  for (const page of footerPages) {
+    await prisma.menuItem.create({
+      data: {
+        menuId: footerMenu.id,
+        label: page.title,
+        labelAr: page.title,
+        type: 'PAGE',
+        pageId: page.id,
+        sortOrder: footerSortOrder++,
+        isActive: true,
+        isVisible: true,
+      },
+    });
+  }
+
+  console.log('✅ Footer menu created');
+
   console.log('\n🎉 Database seeding completed!');
 }
 

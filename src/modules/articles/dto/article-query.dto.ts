@@ -58,7 +58,13 @@ export class ArticleQueryDto extends PaginationDto {
   @IsOptional()
   isBreaking?: boolean;
 
-  @ApiPropertyOptional({ enum: ['createdAt', 'publishedAt', 'title', 'viewsTotal', 'viewCount'] })
+  @ApiPropertyOptional({ description: 'Filter scheduled articles' })
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  @IsOptional()
+  scheduled?: boolean;
+
+  @ApiPropertyOptional({ enum: ['createdAt', 'publishedAt', 'title', 'viewsTotal', 'viewCount', 'scheduledAt'] })
   @IsString()
   @IsOptional()
   sortBy?: string = 'createdAt';

@@ -137,6 +137,14 @@ export class ArticlesService {
       where.isBreaking = query.isBreaking;
     }
 
+    // Filter for scheduled articles
+    if (query.scheduled !== undefined) {
+      if (query.scheduled) {
+        where.status = 'SCHEDULED';
+        where.scheduledAt = { not: null };
+      }
+    }
+
     const orderBy: any = {};
     if (query.sortBy === 'viewsTotal' || query.sortBy === 'viewCount') {
       orderBy.analytics = { viewsTotal: query.sortOrder || 'desc' };
