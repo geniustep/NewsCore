@@ -586,5 +586,204 @@ export class ArticlesService {
       updatedAt: article.updatedAt,
     };
   }
+
+  async getWorkflow(id: string) {
+    const article = await this.prisma.article.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+        editor: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+        versions: {
+          orderBy: { version: 'desc' },
+          include: {
+            createdBy: {
+              select: {
+                id: true,
+                displayName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!article || article.deletedAt) {
+      throw new NotFoundException('المقال غير موجود');
+    }
+
+    // Build workflow steps from versions and status changes
+    const steps = [];
+
+    // Initial creation
+    steps.push({
+      id: `step-${article.id}-created`,
+      status: 'DRAFT',
+      userId: article.authorId,
+      userName: article.author?.displayName || 'مجهول',
+      comment: 'تم إنشاء المقال',
+      createdAt: article.createdAt,
+    });
+
+    // Add version steps
+    article.versions.forEach((version) => {
+      steps.push({
+        id: `step-${version.id}`,
+        status: article.status,
+        userId: version.createdById,
+        userName: version.createdBy?.displayName || 'مجهول',
+        comment: version.reason || 'تحديث المقال',
+        createdAt: version.createdAt,
+      });
+    });
+
+    // Current status
+    if (article.status !== 'DRAFT') {
+      steps.push({
+        id: `step-${article.id}-current`,
+        status: article.status,
+        userId: article.editorId || article.authorId,
+        userName: article.editor?.displayName || article.author?.displayName || 'مجهول',
+        comment: `الحالة الحالية: ${this.getStatusLabel(article.status)}`,
+        createdAt: article.updatedAt,
+      });
+    }
+
+    return {
+      articleId: article.id,
+      currentStatus: article.status,
+      steps: steps.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
+      reviewer: article.editor,
+    };
+  }
+
+  async updateWorkflowStatus(id: string, status: string, comment: string | undefined, userId: string) {
+    const article = await this.prisma.article.findUnique({
+      where: { id },
+    });
+
+    if (!article || article.deletedAt) {
+      throw new NotFoundException('المقال غير موجود');
+    }
+
+    // Create version record
+    await this.prisma.articleVersion.create({
+      data: {
+        articleId: article.id,
+        version: await this.getNextVersion(article.id),
+        title: article.title,
+        content: article.content,
+        createdById: userId,
+        reason: comment || `تغيير الحالة إلى ${status}`,
+      },
+    });
+
+    const updateData: any = {
+      status: status as any,
+      editorId: userId,
+    };
+
+    if (status === 'PUBLISHED' && !article.publishedAt) {
+      updateData.publishedAt = new Date();
+    }
+
+    await this.prisma.article.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return this.getWorkflow(id);
+  }
+
+  async addReviewComment(id: string, comment: string, userId: string) {
+    const article = await this.prisma.article.findUnique({
+      where: { id },
+    });
+
+    if (!article || article.deletedAt) {
+      throw new NotFoundException('المقال غير موجود');
+    }
+
+    // Create version with comment
+    await this.prisma.articleVersion.create({
+      data: {
+        articleId: article.id,
+        version: await this.getNextVersion(article.id),
+        title: article.title,
+        content: article.content,
+        createdById: userId,
+        reason: comment,
+      },
+    });
+
+    return {
+      message: 'تم إضافة التعليق بنجاح',
+      comment: {
+        id: `comment-${Date.now()}`,
+        userId,
+        comment,
+        createdAt: new Date(),
+      },
+    };
+  }
+
+  async assignReviewer(id: string, reviewerId: string, userId: string) {
+    const article = await this.prisma.article.findUnique({
+      where: { id },
+    });
+
+    if (!article || article.deletedAt) {
+      throw new NotFoundException('المقال غير موجود');
+    }
+
+    const reviewer = await this.prisma.user.findUnique({
+      where: { id: reviewerId },
+      select: {
+        id: true,
+        displayName: true,
+        avatarUrl: true,
+      },
+    });
+
+    if (!reviewer) {
+      throw new NotFoundException('المراجع غير موجود');
+    }
+
+    await this.prisma.article.update({
+      where: { id },
+      data: {
+        editorId: reviewerId,
+        status: 'PENDING_REVIEW' as any,
+      },
+    });
+
+    return {
+      message: 'تم تعيين المراجع بنجاح',
+      reviewer,
+    };
+  }
+
+  private getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      DRAFT: 'مسودة',
+      PENDING_REVIEW: 'بانتظار المراجعة',
+      APPROVED: 'مُعتمد',
+      PUBLISHED: 'منشور',
+      ARCHIVED: 'مؤرشف',
+      REJECTED: 'مرفوض',
+    };
+    return labels[status] || status;
+  }
 }
 

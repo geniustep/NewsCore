@@ -17,7 +17,14 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { ArticlesService } from './articles.service';
-import { CreateArticleDto, UpdateArticleDto, ArticleQueryDto } from './dto';
+import {
+  CreateArticleDto,
+  UpdateArticleDto,
+  ArticleQueryDto,
+  UpdateWorkflowStatusDto,
+  AddReviewCommentDto,
+  AssignReviewerDto,
+} from './dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -133,6 +140,57 @@ export class ArticlesController {
     @CurrentUser('roles') roles: string[],
   ) {
     return this.articlesService.remove(id, userId, roles);
+  }
+
+  @Get(':id/workflow')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'الحصول على سير العمل للمقال' })
+  @ApiResponse({ status: 200, description: 'سير العمل' })
+  getWorkflow(@Param('id', ParseUUIDPipe) id: string) {
+    return this.articlesService.getWorkflow(id);
+  }
+
+  @Post(':id/workflow/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'super_admin', 'editor')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'تحديث حالة المقال في سير العمل' })
+  @ApiResponse({ status: 200, description: 'تم تحديث الحالة بنجاح' })
+  updateWorkflowStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateWorkflowStatusDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.articlesService.updateWorkflowStatus(id, dto.status, dto.comment, userId);
+  }
+
+  @Post(':id/review-comments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'super_admin', 'editor')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'إضافة تعليق مراجعة' })
+  @ApiResponse({ status: 200, description: 'تم إضافة التعليق بنجاح' })
+  addReviewComment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AddReviewCommentDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.articlesService.addReviewComment(id, dto.comment, userId);
+  }
+
+  @Post(':id/assign-reviewer')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'super_admin', 'editor')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'تعيين مراجع للمقال' })
+  @ApiResponse({ status: 200, description: 'تم تعيين المراجع بنجاح' })
+  assignReviewer(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AssignReviewerDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.articlesService.assignReviewer(id, dto.reviewerId, userId);
   }
 }
 

@@ -17,6 +17,9 @@ import { TagsModule } from './modules/tags/tags.module';
 import { MediaModule } from './modules/media/media.module';
 import { MenusModule } from './modules/menus/menus.module';
 import { PagesModule } from './modules/pages/pages.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { BreakingNewsModule } from './modules/breaking-news/breaking-news.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 import { AppController } from './app.controller';
 import { JwtAuthGuard } from './modules/auth/guards';
@@ -46,6 +49,9 @@ import { CorsInterceptor } from './common/interceptors/cors.interceptor';
     MediaModule,
     MenusModule,
     PagesModule,
+    SettingsModule,
+    BreakingNewsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

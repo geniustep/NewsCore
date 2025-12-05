@@ -34,11 +34,11 @@ services:
       - "traefik.http.middlewares.cors-headers.headers.accessControlMaxAge=100"
       - "traefik.http.middlewares.cors-headers.headers.addVaryHeader=true"
       # HTTP to HTTPS redirect
-      - "traefik.http.routers.newscore-api-web.rule=Host(`admin.sahara2797.com`)"
+      - "traefik.http.routers.newscore-api-web.rule=Host(`api.sahara2797.com`)"
       - "traefik.http.routers.newscore-api-web.entrypoints=web"
       - "traefik.http.routers.newscore-api-web.middlewares=https-redirect"
       # HTTPS
-      - "traefik.http.routers.newscore-api.rule=Host(`admin.sahara2797.com`)"
+      - "traefik.http.routers.newscore-api.rule=Host(`api.sahara2797.com`)"
       - "traefik.http.routers.newscore-api.entrypoints=websecure"
       - "traefik.http.routers.newscore-api.tls.certresolver=lehttp"
       - "traefik.http.routers.newscore-api.middlewares=cors-headers"
