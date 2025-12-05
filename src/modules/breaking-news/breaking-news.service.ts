@@ -1,11 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../database/prisma.service';
 import { SlugUtil } from '../../common/utils/slug.util';
 import { CreateBreakingNewsDto, UpdateBreakingNewsDto } from './dto';
 
 @Injectable()
 export class BreakingNewsService {
-  constructor(private prisma: PrismaService) {}
+  private readonly frontendUrl: string;
+
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {
+    this.frontendUrl = this.configService.get<string>('frontendUrl', 'https://www.sahara2797.com');
+  }
+
+  private buildArticleUrl(slug: string, language: string = 'ar'): string {
+    return `${this.frontendUrl}/${language}/article/${slug}`;
+  }
 
   async getActive() {
     const now = new Date();
@@ -29,6 +41,7 @@ export class BreakingNewsService {
         id: true,
         title: true,
         slug: true,
+        language: true,
         publishedAt: true,
         priority: true,
         isBreaking: true,
@@ -38,7 +51,7 @@ export class BreakingNewsService {
     return articles.map((article) => ({
       id: article.id,
       title: article.title,
-      url: `/article/${article.slug}`,
+      url: this.buildArticleUrl(article.slug, article.language),
       priority: article.priority || 0,
       isActive: article.isBreaking,
       expiresAt: null, // يمكن إضافة expiresAt لاحقاً
@@ -68,7 +81,8 @@ export class BreakingNewsService {
     return articles.map((article) => ({
       id: article.id,
       title: article.title,
-      url: `/article/${article.slug}`,
+      url: this.buildArticleUrl(article.slug, article.language),
+      slug: article.slug,
       priority: article.priority || 0,
       isActive: article.isBreaking,
       expiresAt: article.expiresAt,
@@ -105,7 +119,8 @@ export class BreakingNewsService {
     return {
       id: article.id,
       title: article.title,
-      url: dto.url || `/article/${article.slug}`,
+      url: dto.url || this.buildArticleUrl(article.slug, article.language),
+      slug: article.slug,
       priority: article.priority || 0,
       isActive: article.isBreaking,
       expiresAt: article.expiresAt,
@@ -158,7 +173,8 @@ export class BreakingNewsService {
     return {
       id: updated.id,
       title: updated.title,
-      url: dto.url || `/article/${updated.slug}`,
+      url: dto.url || this.buildArticleUrl(updated.slug, updated.language),
+      slug: updated.slug,
       priority: updated.priority || 0,
       isActive: updated.isBreaking,
       expiresAt: updated.expiresAt,
