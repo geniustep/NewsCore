@@ -1130,3 +1130,365 @@ model MenuRevision {
   @@index([createdAt])
   @@map("menu_revisions")
 }
+
+// ============================================
+// THEMES SYSTEM
+// ============================================
+
+model Theme {
+  id              String      @id @default(uuid()) @db.Uuid
+  slug            String      @unique @db.VarChar(100)
+  name            String      @db.VarChar(200)
+  version         String      @db.VarChar(20)
+  author          String?     @db.VarChar(200)
+  authorUrl       String?     @map("author_url") @db.VarChar(500)
+  description     String?     @db.Text
+  previewImage    String?     @map("preview_image") @db.VarChar(500)
+  screenshots     Json?       // Array of screenshot URLs
+  
+  // Configuration
+  manifest        Json        // Full theme.json content
+  settings        Json?       // Current theme customization
+  defaultSettings Json?       @map("default_settings")
+  
+  // Features
+  features        String[]    // Supported features: articles, pages, menus, widgets
+  templates       Json?       // Available templates: home, article, category, etc.
+  regions         Json?       // Theme regions: header, footer, sidebar, etc.
+  
+  // Status
+  isActive        Boolean     @default(false) @map("is_active")
+  isDefault       Boolean     @default(false) @map("is_default")
+  isSystem        Boolean     @default(false) @map("is_system")
+  
+  // Compatibility
+  minCoreVersion  String?     @map("min_core_version") @db.VarChar(20)
+  requiredModules String[]    @map("required_modules")
+  
+  // Path
+  path            String      @db.VarChar(500) // Path to theme files
+  
+  // Timestamps
+  installedAt     DateTime    @default(now()) @map("installed_at")
+  activatedAt     DateTime?   @map("activated_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  
+  themeSettings   ThemeSetting[]
+  
+  @@index([isActive])
+  @@index([slug])
+  @@map("themes")
+}
+
+model ThemeSetting {
+  id        String   @id @default(uuid()) @db.Uuid
+  themeId   String   @map("theme_id") @db.Uuid
+  key       String   @db.VarChar(100)
+  value     Json
+  type      String   @db.VarChar(50) // color, font, number, text, image, select
+  group     String?  @db.VarChar(100) // colors, typography, layout, header, footer
+  label     String?  @db.VarChar(200)
+  description String? @db.Text
+  options   Json?    // For select type
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  theme     Theme    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  
+  @@unique([themeId, key])
+  @@index([themeId])
+  @@index([group])
+  @@map("theme_settings")
+}
+
+// ============================================
+// MODULES SYSTEM (Plugin Architecture)
+// ============================================
+
+model Module {
+  id              String       @id @default(uuid()) @db.Uuid
+  slug            String       @unique @db.VarChar(100)
+  name            String       @db.VarChar(200)
+  version         String       @db.VarChar(20)
+  author          String?      @db.VarChar(200)
+  authorUrl       String?      @map("author_url") @db.VarChar(500)
+  description     String?      @db.Text
+  icon            String?      @db.VarChar(100)
+  previewImage    String?      @map("preview_image") @db.VarChar(500)
+  type            ModuleType   @default(EXTENSION)
+  
+  // Configuration
+  manifest        Json         // Full module.json content
+  settings        Json?        // Current module settings
+  defaultSettings Json?        @map("default_settings")
+  
+  // Provides
+  routes          Json?        // API routes this module provides
+  adminPages      Json?        @map("admin_pages") // Admin pages
+  frontendComponents Json?     @map("frontend_components") // Frontend components
+  hooks           Json?        // Event hooks this module uses
+  permissions     Json?        // Permissions this module requires/provides
+  
+  // Status
+  isEnabled       Boolean      @default(false) @map("is_enabled")
+  isInstalled     Boolean      @default(false) @map("is_installed")
+  isCore          Boolean      @default(false) @map("is_core")
+  isSystem        Boolean      @default(false) @map("is_system") // Cannot be disabled
+  
+  // Dependencies
+  dependencies    String[]     // Required module slugs
+  dependents      String[]     // Modules that depend on this
+  
+  // Compatibility
+  minCoreVersion  String?      @map("min_core_version") @db.VarChar(20)
+  
+  // Path
+  path            String       @db.VarChar(500) // Path to module files
+  
+  // Timestamps
+  installedAt     DateTime?    @map("installed_at")
+  enabledAt       DateTime?    @map("enabled_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  
+  moduleSettings  ModuleSetting[]
+  
+  @@index([type])
+  @@index([isEnabled])
+  @@index([slug])
+  @@map("modules")
+}
+
+enum ModuleType {
+  CORE        // Core system module (cannot be removed)
+  EXTENSION   // Feature extension
+  WIDGET      // Frontend widget
+  INTEGRATION // Third-party integration
+}
+
+model ModuleSetting {
+  id          String   @id @default(uuid()) @db.Uuid
+  moduleId    String   @map("module_id") @db.Uuid
+  key         String   @db.VarChar(100)
+  value       Json
+  type        String   @db.VarChar(50)
+  group       String?  @db.VarChar(100)
+  label       String?  @db.VarChar(200)
+  description String?  @db.Text
+  options     Json?
+  isSecret    Boolean  @default(false) @map("is_secret") // For API keys, etc.
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  @@unique([moduleId, key])
+  @@index([moduleId])
+  @@map("module_settings")
+}
+
+// ============================================
+// ADVANCED TRANSLATION SYSTEM
+// ============================================
+
+model Language {
+  id           String   @id @default(uuid()) @db.Uuid
+  code         String   @unique @db.VarChar(10) // ar, en, fr, es, de
+  name         String   @db.VarChar(100) // Arabic, English, French
+  nativeName   String   @map("native_name") @db.VarChar(100) // العربية, English, Français
+  direction    String   @default("ltr") @db.VarChar(3) // ltr, rtl
+  flag         String?  @db.VarChar(10) // 🇸🇦, 🇬🇧, 🇫🇷
+  
+  // Status
+  isActive     Boolean  @default(true) @map("is_active")
+  isDefault    Boolean  @default(false) @map("is_default")
+  isFallback   Boolean  @default(false) @map("is_fallback") // Fallback language
+  
+  // Locale settings
+  dateFormat   String?  @map("date_format") @db.VarChar(50) // DD/MM/YYYY
+  timeFormat   String?  @map("time_format") @db.VarChar(50) // HH:mm
+  timezone     String?  @db.VarChar(50) // UTC+3
+  numberFormat Json?    @map("number_format") // { decimal: '.', thousand: ',' }
+  currency     String?  @db.VarChar(10) // SAR, USD, EUR
+  
+  // SEO
+  locale       String?  @db.VarChar(10) // ar_SA, en_US, fr_FR
+  hreflang     String?  @db.VarChar(10) // ar, en, fr
+  
+  // Status
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  translations TranslationKey[]
+  
+  @@index([isActive])
+  @@index([code])
+  @@map("languages")
+}
+
+model TranslationNamespace {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(100) // common, admin, articles, errors
+  description String?  @db.Text
+  isSystem    Boolean  @default(false) @map("is_system")
+  
+  // Source
+  moduleSlug  String?  @map("module_slug") @db.VarChar(100)
+  themeSlug   String?  @map("theme_slug") @db.VarChar(100)
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  keys        TranslationKey[]
+  
+  @@index([moduleSlug])
+  @@index([themeSlug])
+  @@map("translation_namespaces")
+}
+
+model TranslationKey {
+  id           String   @id @default(uuid()) @db.Uuid
+  namespaceId  String   @map("namespace_id") @db.Uuid
+  key          String   @db.VarChar(255) // nav.home, errors.notFound, buttons.save
+  languageId   String   @map("language_id") @db.Uuid
+  value        String   @db.Text
+  
+  // Metadata
+  isReviewed   Boolean  @default(false) @map("is_reviewed")
+  isAuto       Boolean  @default(false) @map("is_auto") // AI translated
+  context      String?  @db.Text // Context for translators
+  pluralForms  Json?    @map("plural_forms") // { one: '', few: '', many: '', other: '' }
+  
+  // Quality
+  reviewedById String?  @map("reviewed_by_id") @db.Uuid
+  reviewedAt   DateTime? @map("reviewed_at")
+  
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  namespace TranslationNamespace @relation(fields: [namespaceId], references: [id], onDelete: Cascade)
+  language  Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  
+  @@unique([namespaceId, key, languageId])
+  @@index([namespaceId])
+  @@index([languageId])
+  @@index([key])
+  @@map("translation_keys")
+}
+
+// ============================================
+// WIDGETS SYSTEM
+// ============================================
+
+model Widget {
+  id              String   @id @default(uuid()) @db.Uuid
+  slug            String   @unique @db.VarChar(100)
+  name            String   @db.VarChar(200)
+  description     String?  @db.Text
+  type            String   @db.VarChar(50) // html, articles, categories, custom
+  
+  // Content
+  content         Json?    // Widget content/configuration
+  
+  // Display
+  region          String?  @db.VarChar(50) // sidebar, footer, header
+  position        Int      @default(0)
+  
+  // Visibility
+  isActive        Boolean  @default(true) @map("is_active")
+  showOnMobile    Boolean  @default(true) @map("show_on_mobile")
+  showOnDesktop   Boolean  @default(true) @map("show_on_desktop")
+  
+  // Conditions
+  displayConditions Json?  @map("display_conditions") // { pages: [], categories: [], languages: [] }
+  
+  // Styling
+  cssClass        String?  @map("css_class") @db.VarChar(200)
+  customCss       String?  @map("custom_css") @db.Text
+  
+  // Cache
+  cacheEnabled    Boolean  @default(true) @map("cache_enabled")
+  cacheTtl        Int      @default(3600) @map("cache_ttl") // seconds
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  @@index([region])
+  @@index([isActive])
+  @@map("widgets")
+}
+
+// ============================================
+// HOOKS/EVENTS SYSTEM
+// ============================================
+
+model Hook {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String   @unique @db.VarChar(100) // article.beforeSave, user.afterLogin
+  description     String?  @db.Text
+  isSystem        Boolean  @default(false) @map("is_system")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  listeners       HookListener[]
+  
+  @@map("hooks")
+}
+
+model HookListener {
+  id              String   @id @default(uuid()) @db.Uuid
+  hookId          String   @map("hook_id") @db.Uuid
+  moduleSlug      String   @map("module_slug") @db.VarChar(100)
+  handler         String   @db.VarChar(200) // Module handler function
+  priority        Int      @default(10)
+  isEnabled       Boolean  @default(true) @map("is_enabled")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  hook            Hook     @relation(fields: [hookId], references: [id], onDelete: Cascade)
+  
+  @@unique([hookId, moduleSlug])
+  @@index([hookId])
+  @@index([priority])
+  @@map("hook_listeners")
+}
+
+// ============================================
+// BREAKING NEWS (Enhanced)
+// ============================================
+
+model BreakingNews {
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String   @db.VarChar(500)
+  titleAr         String?  @map("title_ar") @db.VarChar(500)
+  titleEn         String?  @map("title_en") @db.VarChar(500)
+  titleFr         String?  @map("title_fr") @db.VarChar(500)
+  
+  // Link
+  url             String?  @db.VarChar(1000)
+  articleId       String?  @map("article_id") @db.Uuid
+  
+  // Display
+  priority        Int      @default(0)
+  style           String   @default("ticker") @db.VarChar(50) // ticker, banner, popup
+  backgroundColor String?  @map("background_color") @db.VarChar(20)
+  textColor       String?  @map("text_color") @db.VarChar(20)
+  
+  // Status
+  isActive        Boolean  @default(true) @map("is_active")
+  startsAt        DateTime? @map("starts_at")
+  expiresAt       DateTime? @map("expires_at")
+  
+  // Targeting
+  languages       String[] // Target languages
+  
+  createdById     String   @map("created_by_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  @@index([isActive])
+  @@index([priority])
+  @@index([expiresAt])
+  @@map("breaking_news")
+}

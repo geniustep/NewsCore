@@ -7,7 +7,17 @@ import { join } from 'path';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 
+// Database
 import { DatabaseModule } from './database/database.module';
+
+// Core System Modules (Themes, Modules, i18n, Hooks, Widgets)
+import { ThemesModule } from './core/themes/themes.module';
+import { ModulesModule } from './core/modules/modules.module';
+import { I18nModule } from './core/i18n/i18n.module';
+import { HooksModule } from './core/hooks/hooks.module';
+import { WidgetsModule } from './core/widgets/widgets.module';
+
+// Feature Modules
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -29,17 +39,31 @@ import { CorsInterceptor } from './common/interceptors/cors.interceptor';
 
 @Module({
   imports: [
+    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
       validationSchema,
       expandVariables: true,
     }),
+    
+    // Static Files
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
     }),
+    
+    // Database
     DatabaseModule,
+    
+    // Core System (Plugin Architecture)
+    ThemesModule,      // Theme Management
+    ModulesModule,     // Module/Plugin Management
+    I18nModule,        // Translation Management
+    HooksModule,       // Event Hooks System
+    WidgetsModule,     // Widget Management
+    
+    // Feature Modules
     HealthModule,
     AuthModule,
     UsersModule,
