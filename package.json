@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Modern News CMS backend built with NestJS and TypeScript.",
   "license": "MIT",
+  "prisma": {
+    "seed": "ts-node prisma/seed-core.ts"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
